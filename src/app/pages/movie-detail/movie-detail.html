@@ -1,0 +1,523 @@
+@if (isLoading()) {
+  <div class="detail-loading-wrapper">
+    <div class="spinner lg"></div>
+    <p class="loading-label">Loading movie details…</p>
+  </div>
+} @else if (errorMessage()) {
+  <div class="detail-error-wrapper">
+    <div class="empty-state">
+      <div class="empty-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="8" x2="12" y2="12"></line>
+          <line x1="12" y1="16" x2="12.01" y2="16"></line>
+        </svg>
+      </div>
+      <h3>Film Not Found</h3>
+      <p>{{ errorMessage() }}</p>
+      <a routerLink="/discover" class="btn-primary btn-sm">Return to Discover</a>
+    </div>
+  </div>
+} @else if (movieData(); as m) {
+  <div class="detail-page-wrapper">
+    <!-- Backdrop banner with dark editorial gradient overlay -->
+    <div
+      class="detail-backdrop-banner"
+      [style.background-image]="'url(' + tmdbService.getImageUrl(m.backdrop_path, 'original') + ')'"
+    ></div>
+    <div class="backdrop-gradient"></div>
+
+    <div class="detail-container">
+      <!-- Breadcrumb navigation -->
+      <nav class="detail-breadcrumbs" aria-label="Breadcrumb">
+        <a routerLink="/discover" class="btn-back" id="btn-back-discover">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+          <span>Discover</span>
+        </a>
+        <span class="breadcrumb-separator">/</span>
+        <span class="breadcrumb-current">{{ m.title }}</span>
+      </nav>
+
+      <!-- Main Presentation Layout -->
+      <div class="presentation-layout animate-fade-in">
+        <!-- Poster Column -->
+        <div class="poster-column">
+          <div class="poster-frame">
+            <img
+              [src]="tmdbService.getImageUrl(m.poster_path, 'w500')"
+              [alt]="m.title"
+              class="detail-poster-img"
+              (error)="onImgError($event, 'poster')"
+            />
+
+            <!-- Badges -->
+            @if (watchlistService.isWatched(m.id)) {
+              <div class="watched-overlay-badge" title="Watched">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+                <span>Watched</span>
+              </div>
+            } @else if (watchlistService.isInWatchlist(m.id)) {
+              <div class="watchlist-overlay-badge" title="In Watchlist">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+                </svg>
+                <span>In Watchlist</span>
+              </div>
+            }
+
+            @if (watchlistService.isFavorite(m.id)) {
+              <div class="favorite-overlay-badge" title="Favorited">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                </svg>
+              </div>
+            }
+
+            @if (primaryTrailer()) {
+              <button
+                type="button"
+                class="poster-trailer-btn"
+                (click)="openTrailer()"
+                title="Play official trailer"
+                aria-label="Play official trailer"
+              >
+                <div class="play-icon-circle">
+                  <svg viewBox="0 0 24 24" fill="currentColor">
+                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                  </svg>
+                </div>
+                <span>Trailer</span>
+              </button>
+            }
+          </div>
+        </div>
+
+        <!-- Info Column -->
+        <div class="info-column">
+          <!-- Meta tags line -->
+          <div class="meta-line">
+            @if (m.release_date) {
+              <span>{{ m.release_date.substring(0, 4) }}</span>
+            }
+            @if (m.certification) {
+              <span class="dot-sep"></span>
+              <span class="cert-pill">{{ m.certification }}</span>
+            }
+            @if (m.runtime) {
+              <span class="dot-sep"></span>
+              <span>{{ formatRuntime(m.runtime) }}</span>
+            }
+            @if (m.status) {
+              <span class="dot-sep"></span>
+              <span class="status-pill">{{ m.status }}</span>
+            }
+          </div>
+
+          <h1 class="movie-main-title">{{ m.title }}</h1>
+
+          @if (m.original_title && m.original_title !== m.title) {
+            <p class="movie-original-title">Original Title: <em>{{ m.original_title }}</em></p>
+          }
+
+          @if (m.tagline) {
+            <p class="movie-detail-tagline">“{{ m.tagline }}”</p>
+          }
+
+          <!-- Rating & Genres -->
+          <div class="score-row">
+            <div class="tmdb-score" title="TMDB Rating">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+              </svg>
+              <strong>{{ m.vote_average ? m.vote_average.toFixed(1) : 'NR' }}</strong>
+              <span>/ 10 · {{ m.vote_count ? m.vote_count.toLocaleString() : 0 }} votes</span>
+            </div>
+
+            @if (m.genres && m.genres.length > 0) {
+              <div class="genre-list">
+                @for (genre of m.genres; track genre.id) {
+                  <span class="badge-tag">{{ genre.name }}</span>
+                }
+              </div>
+            }
+          </div>
+
+          <!-- Overview -->
+          <p class="overview-text">{{ m.overview }}</p>
+
+          <!-- Key crew credits in hero -->
+          @if (keyCrew().length > 0) {
+            <div class="key-crew-strip">
+              @for (crew of keyCrew(); track crew.role + crew.name) {
+                <div class="crew-pill">
+                  <span class="crew-role">{{ crew.role }}</span>
+                  <span class="crew-name">{{ crew.name }}</span>
+                </div>
+              }
+            </div>
+          }
+
+          <!-- Primary Actions Toolbar -->
+          <div class="tracker-buttons">
+            @if (primaryTrailer()) {
+              <button
+                type="button"
+                class="btn-primary accent"
+                (click)="openTrailer()"
+                id="btn-detail-trailer"
+              >
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                  <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                </svg>
+                <span>Trailer</span>
+              </button>
+            }
+
+            <button
+              type="button"
+              class="btn-secondary"
+              [class.is-active]="watchlistService.isInWatchlist(m.id)"
+              (click)="toggleWatchlist()"
+              id="btn-detail-watchlist"
+            >
+              <svg viewBox="0 0 24 24" [attr.fill]="watchlistService.isInWatchlist(m.id) ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="2">
+                <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+              </svg>
+              <span>{{ watchlistService.isInWatchlist(m.id) ? 'In Watchlist' : 'Watchlist' }}</span>
+            </button>
+
+            <button
+              type="button"
+              class="btn-secondary"
+              [class.is-active]="watchlistService.isWatched(m.id)"
+              (click)="toggleWatched()"
+              id="btn-detail-watched"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+              <span>{{ watchlistService.isWatched(m.id) ? 'Watched' : 'Mark Watched' }}</span>
+            </button>
+
+            <button
+              type="button"
+              class="btn-icon"
+              [class.active]="watchlistService.isFavorite(m.id)"
+              (click)="toggleFavorite()"
+              id="btn-detail-favorite"
+              [title]="watchlistService.isFavorite(m.id) ? 'Remove favorite' : 'Add to favorites'"
+              [attr.aria-label]="watchlistService.isFavorite(m.id) ? 'Remove favorite' : 'Add to favorites'"
+            >
+              <svg viewBox="0 0 24 24" [attr.fill]="watchlistService.isFavorite(m.id) ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="2">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+              </svg>
+            </button>
+
+            <button
+              type="button"
+              class="btn-secondary"
+              (click)="openReview()"
+              id="btn-detail-review"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 20h9"></path>
+                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"></path>
+              </svg>
+              <span>{{ userReview ? 'Edit review' : 'Write review' }}</span>
+            </button>
+
+            @if (m.imdb_id) {
+              <a
+                [href]="'https://www.imdb.com/title/' + m.imdb_id"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="btn-secondary btn-icon-text"
+                title="View on IMDb"
+              >
+                <span class="imdb-badge">IMDb</span>
+              </a>
+            }
+
+            @if (m.homepage) {
+              <a
+                [href]="m.homepage"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="btn-icon quiet"
+                title="Official Website"
+                aria-label="Official Website"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                  <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+                </svg>
+              </a>
+            }
+          </div>
+
+          <!-- Personal 10-point score selector -->
+          <div class="user-quick-rating">
+            <div class="rating-label">
+              <span>Your Personal Score</span>
+              <strong>{{ userRating ? userRating + ' / 10' : 'Not rated yet' }}</strong>
+            </div>
+            <div class="rating-pills-row" role="radiogroup" aria-label="Your score out of 10">
+              @for (score of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]; track score) {
+                <button
+                  type="button"
+                  class="score-pill"
+                  role="radio"
+                  [attr.aria-checked]="userRating === score"
+                  [class.filled]="!!userRating && score <= userRating"
+                  (click)="rateMovie(score)"
+                  [attr.aria-label]="score + ' out of 10'"
+                >
+                  <span>{{ score }}</span>
+                </button>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- User's Personal Review Card (if available) -->
+      @if (userReview; as rev) {
+        <section class="user-review-box animate-fade-in">
+          <div class="review-box-header">
+            <div>
+              <span class="eyebrow">Your review · {{ rev.createdAt | date: 'mediumDate' }}</span>
+              <div class="stars">
+                @for (s of [1, 2, 3, 4, 5]; track s) {
+                  <svg viewBox="0 0 24 24" [class.filled]="s <= rev.rating" fill="currentColor">
+                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                  </svg>
+                }
+              </div>
+            </div>
+
+            <div class="rev-box-actions">
+              <button class="btn-icon sm quiet" (click)="openReview()" title="Edit review" aria-label="Edit review">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 20h9"></path>
+                  <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"></path>
+                </svg>
+              </button>
+              <button class="btn-icon sm quiet danger" (click)="deleteReview(rev.id)" title="Delete review" aria-label="Delete review">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="3 6 5 6 21 6"></polyline>
+                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          @if (rev.headline) {
+            <h3 class="rev-headline">“{{ rev.headline }}”</h3>
+          }
+          @if (rev.content) {
+            <p class="rev-content-text">{{ rev.content }}</p>
+          }
+
+          @if (rev.tags.length > 0 || rev.rewatch) {
+            <div class="rev-tags-footer">
+              @for (t of rev.tags; track t) {
+                <span class="badge-tag">{{ t }}</span>
+              }
+              @if (rev.rewatch) {
+                <span class="badge-tag rewatch">↻ Would rewatch</span>
+              }
+            </div>
+          }
+        </section>
+      }
+
+      <!-- Production Details & Key Facts Grid -->
+      <section class="detail-section facts-section">
+        <div class="section-heading">
+          <h2>Film Facts & Production</h2>
+        </div>
+
+        <div class="facts-grid">
+          <div class="fact-card">
+            <span class="fact-label">Release Date</span>
+            <span class="fact-value">{{ formatDate(m.release_date) || '—' }}</span>
+          </div>
+
+          <div class="fact-card">
+            <span class="fact-label">Runtime</span>
+            <span class="fact-value">{{ formatRuntime(m.runtime) || (m.runtime ? m.runtime + ' min' : '—') }}</span>
+          </div>
+
+          <div class="fact-card">
+            <span class="fact-label">Status</span>
+            <span class="fact-value">{{ m.status || 'Released' }}</span>
+          </div>
+
+          <div class="fact-card">
+            <span class="fact-label">Budget</span>
+            <span class="fact-value">{{ formatCurrency(m.budget) }}</span>
+          </div>
+
+          <div class="fact-card">
+            <span class="fact-label">Box Office Revenue</span>
+            <span class="fact-value">{{ formatCurrency(m.revenue) }}</span>
+          </div>
+
+          @if (m.spoken_languages && m.spoken_languages.length > 0) {
+            <div class="fact-card">
+              <span class="fact-label">Original & Spoken Languages</span>
+              <span class="fact-value">
+                {{ m.spoken_languages[0].english_name }}
+                @if (m.spoken_languages.length > 1) {
+                  <span class="fact-sub">({{ m.spoken_languages.length }} languages)</span>
+                }
+              </span>
+            </div>
+          }
+
+          @if (m.production_countries && m.production_countries.length > 0) {
+            <div class="fact-card">
+              <span class="fact-label">Production Countries</span>
+              <span class="fact-value">
+                @for (c of m.production_countries; track c.iso_3166_1) {
+                  <span class="fact-pill">{{ c.name }}</span>
+                }
+              </span>
+            </div>
+          }
+
+          @if (m.production_companies && m.production_companies.length > 0) {
+            <div class="fact-card span-full">
+              <span class="fact-label">Production Studios</span>
+              <div class="studios-list">
+                @for (company of m.production_companies; track company.id) {
+                  <span class="studio-badge">{{ company.name }}</span>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      </section>
+
+      <!-- Real Cast Section -->
+      @if (castMembers().length > 0) {
+        <section class="detail-section">
+          <div class="section-heading">
+            <h2>Top Cast</h2>
+            <span class="count">{{ castMembers().length }} actors</span>
+          </div>
+          <div class="cast-scroll-track">
+            @for (actor of castMembers(); track actor.id) {
+              <div class="cast-card">
+                <div class="cast-photo-frame">
+                  @if (actor.profile_path) {
+                    <img
+                      [src]="actor.profile_path"
+                      [alt]="actor.name"
+                      class="cast-photo"
+                      loading="lazy"
+                      (error)="onImgError($event, 'avatar')"
+                    />
+                  } @else {
+                    <div class="cast-photo cast-avatar-placeholder">
+                      <svg viewBox="0 0 24 24" fill="currentColor" class="avatar-icon">
+                        <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                      </svg>
+                      <span class="avatar-initials">{{ getInitials(actor.name) }}</span>
+                    </div>
+                  }
+                </div>
+                <span class="cast-name" [title]="actor.name">{{ actor.name }}</span>
+                <span class="cast-character" [title]="actor.character">{{ actor.character || 'Cast' }}</span>
+              </div>
+            }
+          </div>
+        </section>
+      }
+
+      <!-- Videos & Trailers Gallery -->
+      @if (m.videos?.results && m.videos!.results.length > 1) {
+        <section class="detail-section">
+          <div class="section-heading">
+            <h2>Videos & Trailers</h2>
+            <span class="count">{{ m.videos!.results.length }} clips</span>
+          </div>
+
+          <div class="videos-grid">
+            @for (vid of m.videos!.results.slice(0, 4); track vid.id) {
+              <div class="video-card" (click)="activeTrailerKey.set(vid.key)">
+                <div class="video-thumb-container">
+                  <img
+                    [src]="'https://img.youtube.com/vi/' + vid.key + '/hqdefault.jpg'"
+                    [alt]="vid.name"
+                    class="video-thumb"
+                    loading="lazy"
+                  />
+                  <div class="video-play-overlay">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                      <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                    </svg>
+                  </div>
+                </div>
+                <div class="video-meta">
+                  <span class="video-type-badge">{{ vid.type }}</span>
+                  <h4 class="video-title" [title]="vid.name">{{ vid.name }}</h4>
+                </div>
+              </div>
+            }
+          </div>
+        </section>
+      }
+
+      <!-- Recommendations / More Like This -->
+      @if (relatedMovies().length > 0) {
+        <section class="detail-section">
+          <div class="section-heading">
+            <h2>More Like This</h2>
+            <span class="count">{{ relatedMovies().length }} titles</span>
+          </div>
+          <div class="poster-grid">
+            @for (rec of relatedMovies(); track rec.id) {
+              <app-movie-card [movie]="rec"></app-movie-card>
+            }
+          </div>
+        </section>
+      }
+    </div>
+  </div>
+}
+
+<!-- Trailer Modal Player -->
+@if (activeTrailerKey() && safeTrailerUrl()) {
+  <div class="modal-backdrop" (click)="closeTrailer()">
+    <div class="trailer-modal-container" (click)="$event.stopPropagation()">
+      <div class="trailer-modal-header">
+        <h3>{{ primaryTrailer()?.name || 'Official Video' }}</h3>
+        <button type="button" class="btn-close" (click)="closeTrailer()" aria-label="Close trailer">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <div class="trailer-video-wrap">
+        <iframe
+          [src]="safeTrailerUrl()"
+          title="Movie Video"
+          frameborder="0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowfullscreen
+        ></iframe>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Review Modal -->
+@if (showReviewModal() && movieData()) {
+  <app-review-modal [movie]="movieData()!" (close)="closeReview()"></app-review-modal>
+}

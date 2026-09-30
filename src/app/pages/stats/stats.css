@@ -1,0 +1,182 @@
+.page-shell.narrow { max-width: 1040px; }
+
+.alert-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  margin-bottom: 24px;
+  border-radius: var(--radius-md);
+  background: rgba(74, 222, 128, 0.08);
+  border: 1px solid rgba(74, 222, 128, 0.22);
+  color: var(--status-success);
+  font-size: 0.88rem;
+  font-weight: 500;
+}
+
+.alert-banner svg { width: 18px; height: 18px; flex-shrink: 0; }
+
+/* Bento */
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.metric-cell {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 24px;
+  min-height: 150px;
+  padding: 22px;
+  border-radius: var(--radius-lg);
+  background: var(--surface-card);
+  border: 1px solid var(--border-subtle);
+}
+
+.hero-metric {
+  grid-column: span 2;
+  grid-row: span 2;
+  background:
+    radial-gradient(120% 90% at 100% 0%, rgba(244, 183, 64, 0.18), transparent 60%),
+    var(--surface-card);
+  border-color: var(--accent-gold-border);
+}
+
+.metric-title {
+  font-size: 0.74rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+}
+
+.metric-value {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.metric-number {
+  font-family: var(--font-display);
+  font-size: clamp(2.8rem, 5vw, 3.6rem);
+  line-height: 0.9;
+  font-variant-numeric: tabular-nums;
+}
+
+.hero-metric .metric-number {
+  font-size: clamp(5rem, 12vw, 8.5rem);
+  color: var(--accent-gold);
+}
+
+.metric-unit {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.hero-metric .metric-unit { font-size: 1.1rem; }
+
+.metric-foot {
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+}
+
+/* Cards */
+.stats-sub-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.stats-card {
+  display: flex;
+  flex-direction: column;
+  padding: 24px;
+  border-radius: var(--radius-lg);
+  background: var(--surface-card);
+  border: 1px solid var(--border-subtle);
+}
+
+.stats-card h3 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 1.7rem;
+  line-height: 1.1;
+}
+
+.card-desc {
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  margin: 6px 0 24px;
+}
+
+.conversion-bar {
+  display: flex;
+  gap: 4px;
+  height: 14px;
+  margin-bottom: 18px;
+  border-radius: var(--radius-full);
+  background: rgba(255, 255, 255, 0.06);
+  overflow: hidden;
+}
+
+.conversion-fill {
+  flex-basis: 0;
+  min-width: 0;
+  border-radius: var(--radius-full);
+  transition: flex-grow 600ms var(--ease-out);
+}
+
+.watched-fill { background: var(--accent-gold); }
+.watchlist-fill { background: #55555e; }
+
+.legend-row {
+  display: flex;
+  gap: 28px;
+  margin-top: auto;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.86rem;
+  color: var(--text-secondary);
+}
+
+.legend-item strong {
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+}
+
+.watched-dot { background: var(--accent-gold); }
+.queue-dot { background: #55555e; }
+
+.backup-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: auto;
+}
+
+.backup-actions svg { width: 15px; height: 15px; }
+
+.file-upload-label { cursor: pointer; }
+
+@media (max-width: 860px) {
+  .metrics-grid { grid-template-columns: 1fr 1fr; }
+  .hero-metric { grid-row: auto; }
+  .stats-sub-layout { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 480px) {
+  .metric-cell { min-height: 120px; padding: 18px; }
+}

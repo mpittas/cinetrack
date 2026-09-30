@@ -1,0 +1,192 @@
+.movie-card-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.movie-card-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  height: 100%;
+}
+
+.poster-container {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  overflow: hidden;
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.06), 0 8px 24px -12px rgba(0, 0, 0, 0.8);
+  transition: transform var(--transition-base), box-shadow var(--transition-base);
+}
+
+.poster-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 600ms var(--ease-out), filter var(--transition-base);
+}
+
+.poster-sheen {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.35) 0%, transparent 28%),
+    linear-gradient(to top, rgba(0, 0, 0, 0.85) 0%, transparent 45%);
+  opacity: 0.55;
+  transition: opacity var(--transition-base);
+  pointer-events: none;
+}
+
+.movie-card-inner:hover .poster-container,
+.movie-card-inner:focus-visible .poster-container {
+  transform: translateY(-4px);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.14), 0 24px 40px -16px rgba(0, 0, 0, 0.9);
+}
+
+.movie-card-inner:hover .poster-img { transform: scale(1.05); }
+.movie-card-inner:hover .poster-sheen { opacity: 1; }
+
+/* Rating chip */
+.rating-chip {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 24px;
+  padding: 0 8px;
+  border-radius: var(--radius-full);
+  background: rgba(10, 10, 11, 0.62);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: var(--text-primary);
+  font-size: 0.75rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.star-icon {
+  width: 11px;
+  height: 11px;
+  color: var(--accent-gold);
+}
+
+/* Status */
+.status-indicator-chip {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 2;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent-gold);
+  color: var(--text-inverse);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+}
+
+.status-indicator-chip.watched {
+  background: var(--text-primary);
+  color: var(--surface-canvas);
+}
+
+.status-icon {
+  width: 12px;
+  height: 12px;
+}
+
+/* Hover actions */
+.card-hover-actions {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 3;
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity var(--transition-base), transform var(--transition-base);
+}
+
+.movie-card-inner:hover .card-hover-actions,
+.movie-card-inner:focus-within .card-hover-actions {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.card-action-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: var(--text-primary);
+  transition: background var(--transition-fast), transform var(--transition-fast), color var(--transition-fast);
+}
+
+.card-action-btn:hover {
+  background: rgba(255, 255, 255, 0.26);
+  transform: scale(1.08);
+}
+
+.card-action-btn.is-active {
+  background: var(--accent-gold);
+  border-color: var(--accent-gold);
+  color: var(--text-inverse);
+}
+
+.action-icon {
+  width: 15px;
+  height: 15px;
+}
+
+/* Details */
+.card-details {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 0 2px;
+}
+
+.movie-title {
+  font-size: 0.92rem;
+  font-weight: 550;
+  letter-spacing: -0.005em;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: color var(--transition-fast);
+}
+
+.movie-card-inner:hover .movie-title { color: var(--accent-gold); }
+
+.card-meta-line {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.78rem;
+  color: var(--text-tertiary);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Touch devices: no hover, keep the poster clean */
+@media (hover: none) {
+  .card-hover-actions { display: none; }
+  .poster-sheen { opacity: 0.4; }
+}

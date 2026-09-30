@@ -1,0 +1,119 @@
+<div class="modal-backdrop" (click)="onBackdropClick($event)">
+  <div class="modal-container" role="dialog" aria-modal="true" aria-labelledby="review-modal-title">
+    <div class="modal-header">
+      <div class="movie-info-wrap">
+        <img
+          [src]="tmdbService.getImageUrl(movie().poster_path, 'w500')"
+          [alt]="movie().title"
+          (error)="onImgError($event)"
+          class="modal-thumb"
+        />
+        <div>
+          <span class="eyebrow">Log &amp; review</span>
+          <h3 id="review-modal-title">{{ movie().title }}</h3>
+          @if (movie().release_date) {
+            <p class="modal-subtitle">{{ movie().release_date.substring(0, 4) }}</p>
+          }
+        </div>
+      </div>
+      <button class="btn-close" (click)="close.emit()" id="btn-close-review" aria-label="Close">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <!-- Rating -->
+      <div class="rating-picker-section">
+        <span class="field-label">Your rating</span>
+        <div class="rating-row">
+          <div class="stars-row" role="radiogroup" aria-label="Rating">
+            @for (star of [1, 2, 3, 4, 5]; track star) {
+              <button
+                type="button"
+                class="star-btn"
+                role="radio"
+                [attr.aria-checked]="rating === star"
+                [class.filled]="star <= rating"
+                (click)="setRating(star)"
+                [attr.aria-label]="star + (star === 1 ? ' star' : ' stars')"
+              >
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                </svg>
+              </button>
+            }
+          </div>
+          <span class="rating-text-score">
+            @switch (rating) {
+              @case (1) { Didn't work for me }
+              @case (2) { Had its moments }
+              @case (3) { Solid }
+              @case (4) { Really good }
+              @case (5) { Loved it }
+            }
+          </span>
+        </div>
+      </div>
+
+      <div class="field-group">
+        <label for="headline-input" class="field-label">Headline</label>
+        <input id="headline-input" type="text" [(ngModel)]="headline" placeholder="Your take in one line" class="field-input" />
+      </div>
+
+      <div class="field-group">
+        <label for="content-input" class="field-label">Notes</label>
+        <textarea
+          id="content-input"
+          [(ngModel)]="content"
+          rows="4"
+          placeholder="What stuck with you? Performances, score, pacing, that one shot…"
+          class="field-textarea"
+        ></textarea>
+      </div>
+
+      <div class="field-group">
+        <span class="field-label">Tags</span>
+        <div class="tags-container">
+          @for (tag of suggestedTags; track tag) {
+            <button type="button" class="badge-tag" [class.is-active]="selectedTags.includes(tag)" (click)="toggleTag(tag)">
+              {{ tag }}
+            </button>
+          }
+          @for (tag of selectedTags; track tag) {
+            @if (!suggestedTags.includes(tag)) {
+              <button type="button" class="badge-tag is-active" (click)="toggleTag(tag)">{{ tag }}</button>
+            }
+          }
+        </div>
+        <div class="custom-tag-row">
+          <input
+            type="text"
+            [(ngModel)]="customTag"
+            (keyup.enter)="addCustomTag()"
+            placeholder="Add your own tag"
+            class="field-input custom-tag-input"
+            aria-label="Custom tag"
+          />
+          <button type="button" class="btn-secondary btn-sm" (click)="addCustomTag()" [disabled]="!customTag.trim()">Add</button>
+        </div>
+      </div>
+
+      <label class="toggle-row">
+        <span>
+          <span class="toggle-title">Would rewatch</span>
+          <span class="toggle-desc">Recommend it to future you</span>
+        </span>
+        <input type="checkbox" [(ngModel)]="rewatch" id="rewatch-check" class="toggle-input" />
+        <span class="toggle-switch" aria-hidden="true"></span>
+      </label>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-ghost" (click)="close.emit()" id="btn-cancel-review">Cancel</button>
+      <button class="btn-primary accent" (click)="save()" id="btn-save-review">Save review</button>
+    </div>
+  </div>
+</div>

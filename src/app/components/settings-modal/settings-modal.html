@@ -1,0 +1,59 @@
+<div class="modal-backdrop" (click)="onBackdropClick($event)">
+  <div class="modal-container settings" role="dialog" aria-modal="true" aria-labelledby="settings-modal-title">
+    <div class="modal-header">
+      <div>
+        <span class="eyebrow">Data source</span>
+        <h3 id="settings-modal-title">Connect TMDB</h3>
+        <p class="modal-subtitle">Add your own API key to browse the full, live film catalog.</p>
+      </div>
+      <button class="btn-close" (click)="closeModal.emit()" id="btn-close-settings" aria-label="Close">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <div class="input-group">
+        <label for="tmdb-key-input" class="field-label">API key (v3) or read access token (v4)</label>
+        <input
+          id="tmdb-key-input"
+          type="text"
+          [(ngModel)]="apiKeyInput"
+          placeholder="Paste your key"
+          class="field-input mono"
+          autocomplete="off"
+          spellcheck="false"
+        />
+        <span class="helper-text">
+          Optional. Without a key, CineTrack uses a built-in offline catalog. Get a free key at
+          <a href="https://www.themoviedb.org/settings/api" target="_blank" rel="noreferrer">themoviedb.org</a>.
+        </span>
+      </div>
+
+      @if (testStatus() !== 'idle') {
+        <div class="status-box" [class.success]="testStatus() === 'success'" [class.error]="testStatus() === 'error'" [class.testing]="testStatus() === 'testing'" role="status">
+          @if (testStatus() === 'testing') {
+            <span class="spinner"></span>
+          } @else if (testStatus() === 'success') {
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          } @else {
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="9"></circle><line x1="12" y1="8" x2="12" y2="12.5"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+          }
+          <span>{{ statusMessage() }}</span>
+        </div>
+      }
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-ghost" (click)="useDemoKey()" id="btn-use-demo">Use demo catalog</button>
+      <div class="action-buttons">
+        <button class="btn-secondary" (click)="testConnection()" [disabled]="testStatus() === 'testing'" id="btn-test-key">
+          Test
+        </button>
+        <button class="btn-primary accent" (click)="saveKey()" id="btn-save-key">Save key</button>
+      </div>
+    </div>
+  </div>
+</div>

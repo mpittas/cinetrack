@@ -1,0 +1,174 @@
+<div class="page-shell">
+  <header class="page-header">
+    <div>
+      <span class="eyebrow">Your collection</span>
+      <h1 class="page-title">Library</h1>
+      <p class="page-subtitle">Everything you've queued up, watched, and loved.</p>
+    </div>
+
+    <dl class="stats-mini-summary">
+      <div class="stat-mini-item">
+        <dt>Queue</dt>
+        <dd>{{ watchlistService.watchlist().length }}</dd>
+      </div>
+      <div class="stat-mini-item">
+        <dt>Watched</dt>
+        <dd>{{ watchlistService.watched().length }}</dd>
+      </div>
+      <div class="stat-mini-item">
+        <dt>Favorites</dt>
+        <dd>{{ watchlistService.favorites().length }}</dd>
+      </div>
+    </dl>
+  </header>
+
+  <div class="library-toolbar">
+    <div class="segmented" role="tablist" aria-label="Library lists">
+      <button type="button" role="tab" [class.active]="activeTab() === 'watchlist'" [attr.aria-selected]="activeTab() === 'watchlist'" (click)="setTab('watchlist')" id="tab-btn-watchlist">
+        Watchlist <span class="seg-count">{{ watchlistService.watchlist().length }}</span>
+      </button>
+      <button type="button" role="tab" [class.active]="activeTab() === 'watched'" [attr.aria-selected]="activeTab() === 'watched'" (click)="setTab('watched')" id="tab-btn-watched">
+        Watched <span class="seg-count">{{ watchlistService.watched().length }}</span>
+      </button>
+      <button type="button" role="tab" [class.active]="activeTab() === 'favorites'" [attr.aria-selected]="activeTab() === 'favorites'" (click)="setTab('favorites')" id="tab-btn-favorites">
+        Favorites <span class="seg-count">{{ watchlistService.favorites().length }}</span>
+      </button>
+    </div>
+
+    <div class="filters-wrap">
+      <div class="search-field">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="7"></circle>
+          <line x1="20" y1="20" x2="16.5" y2="16.5"></line>
+        </svg>
+        <input type="text" [(ngModel)]="searchFilter" placeholder="Filter" aria-label="Filter list" />
+      </div>
+
+      <select id="sort-select" [(ngModel)]="sortBy" class="field-select" aria-label="Sort by">
+        <option value="date">Recently added</option>
+        <option value="rating">Highest rated</option>
+        <option value="year">Release year</option>
+        <option value="title">Title A–Z</option>
+      </select>
+
+      <div class="segmented icon-only" aria-label="View mode">
+        <button type="button" [class.active]="viewMode() === 'grid'" (click)="viewMode.set('grid')" title="Grid view" aria-label="Grid view">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="4" y="4" width="6.5" height="6.5" rx="1.5"></rect>
+            <rect x="13.5" y="4" width="6.5" height="6.5" rx="1.5"></rect>
+            <rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.5"></rect>
+            <rect x="4" y="13.5" width="6.5" height="6.5" rx="1.5"></rect>
+          </svg>
+        </button>
+        <button type="button" [class.active]="viewMode() === 'list'" (click)="viewMode.set('list')" title="List view" aria-label="List view">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="9" y1="6" x2="20" y2="6"></line>
+            <line x1="9" y1="12" x2="20" y2="12"></line>
+            <line x1="9" y1="18" x2="20" y2="18"></line>
+            <circle cx="4.5" cy="6" r="1" fill="currentColor"></circle>
+            <circle cx="4.5" cy="12" r="1" fill="currentColor"></circle>
+            <circle cx="4.5" cy="18" r="1" fill="currentColor"></circle>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  @if (displayedItems().length > 0) {
+    @if (viewMode() === 'grid') {
+      <div class="poster-grid animate-fade-in">
+        @for (item of displayedItems(); track item.movieId) {
+          <div class="grid-item-card">
+            <app-movie-card [movie]="item.movie" (openReviewModal)="openReview($event)"></app-movie-card>
+            <div class="item-quick-toolbar">
+              <span class="added-date">Added {{ item.addedAt | date: 'MMM d' }}</span>
+              <button type="button" class="btn-text-muted" (click)="removeItem(item.movieId)" title="Remove from list">
+                Remove
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+    } @else {
+      <div class="watchlist-list animate-fade-in">
+        @for (item of displayedItems(); track item.movieId) {
+          <div class="list-item-row">
+            <a [routerLink]="['/movie', item.movieId]" class="list-thumb-link">
+              <img
+                [src]="tmdbService.getImageUrl(item.movie.poster_path, 'w500')"
+                [alt]="item.movie.title"
+                class="list-thumb"
+                loading="lazy"
+                (error)="onImgError($event)"
+              />
+            </a>
+
+            <div class="list-item-details">
+              <div class="list-header-row">
+                <a [routerLink]="['/movie', item.movieId]" class="list-movie-title">{{ item.movie.title }}</a>
+                <span class="list-movie-year">{{ item.movie.release_date.substring(0, 4) }}</span>
+              </div>
+
+              <div class="list-meta-row">
+                <span class="badge-rating">
+                  <svg viewBox="0 0 24 24" fill="currentColor" class="star-icon">
+                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                  </svg>
+                  {{ item.movie.vote_average.toFixed(1) }}
+                </span>
+                @if (item.userRating) {
+                  <span class="my-score">You: <strong>{{ item.userRating }}/10</strong></span>
+                }
+                <span class="added-date">Added {{ item.addedAt | date: 'mediumDate' }}</span>
+              </div>
+
+              <p class="list-overview">{{ item.movie.overview }}</p>
+            </div>
+
+            <div class="list-actions">
+              @if (item.status === 'watchlist') {
+                <button class="btn-secondary btn-sm" (click)="moveToWatched(item.movie)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                  Watched
+                </button>
+              } @else {
+                <button class="btn-secondary btn-sm" (click)="moveToWatchlist(item.movie)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
+                  Watchlist
+                </button>
+              }
+              <button class="btn-secondary btn-sm" (click)="openReview(item.movie)">Review</button>
+              <button class="btn-icon sm quiet danger" (click)="removeItem(item.movieId)" title="Remove" aria-label="Remove from list">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="3 6 5 6 21 6"></polyline>
+                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  } @else {
+    <div class="empty-state animate-fade-in">
+      <div class="empty-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+        </svg>
+      </div>
+      <h3>
+        @switch (activeTab()) {
+          @case ('watched') { Nothing watched yet }
+          @case ('favorites') { No favorites yet }
+          @default { Your watchlist is empty }
+        }
+      </h3>
+      <p>Find something good in Discover and save it here.</p>
+      <a routerLink="/discover" class="btn-primary btn-sm">Browse films</a>
+    </div>
+  }
+</div>
+
+@if (activeReviewMovie()) {
+  <app-review-modal [movie]="activeReviewMovie()!" (close)="closeReview()"></app-review-modal>
+}

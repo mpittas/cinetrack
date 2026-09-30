@@ -1,0 +1,123 @@
+<div class="page-shell narrow">
+  <header class="page-header">
+    <div>
+      <span class="eyebrow">By the numbers</span>
+      <h1 class="page-title">Stats</h1>
+      <p class="page-subtitle">A look at your viewing habits, plus backup and restore for your data.</p>
+    </div>
+  </header>
+
+  @if (statusMessage()) {
+    <div class="alert-banner animate-fade-in" role="status">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+      </svg>
+      <span>{{ statusMessage() }}</span>
+    </div>
+  }
+
+  <!-- Bento metrics -->
+  <section class="metrics-grid animate-fade-in">
+    <div class="metric-cell hero-metric">
+      <span class="metric-title">Time spent watching</span>
+      <div class="metric-value">
+        <span class="metric-number">{{ watchlistService.stats().totalHours }}</span>
+        <span class="metric-unit">hours</span>
+      </div>
+      <span class="metric-foot">That's roughly {{ (watchlistService.stats().totalHours / 24).toFixed(1) }} days in the dark.</span>
+    </div>
+
+    <div class="metric-cell">
+      <span class="metric-title">Films watched</span>
+      <div class="metric-value">
+        <span class="metric-number">{{ watchlistService.stats().watchedCount }}</span>
+      </div>
+    </div>
+
+    <div class="metric-cell">
+      <span class="metric-title">Average score</span>
+      <div class="metric-value">
+        <span class="metric-number">{{ watchlistService.stats().averageRating }}</span>
+        <span class="metric-unit">/ 10</span>
+      </div>
+    </div>
+
+    <div class="metric-cell">
+      <span class="metric-title">Reviews written</span>
+      <div class="metric-value">
+        <span class="metric-number">{{ watchlistService.stats().reviewsCount }}</span>
+      </div>
+    </div>
+
+    <div class="metric-cell">
+      <span class="metric-title">Favorites</span>
+      <div class="metric-value">
+        <span class="metric-number">{{ watchlistService.stats().favoritesCount }}</span>
+      </div>
+    </div>
+  </section>
+
+  <div class="stats-sub-layout">
+    <!-- Collection balance -->
+    <section class="stats-card">
+      <h3>Collection balance</h3>
+      <p class="card-desc">How much of your library you've actually watched.</p>
+
+      <div class="conversion-bar" role="img" [attr.aria-label]="watchlistService.stats().watchedCount + ' watched, ' + watchlistService.stats().watchlistCount + ' queued'">
+        <div
+          class="conversion-fill watched-fill"
+          [style.flex-grow]="watchlistService.stats().watchedCount"
+          title="Watched"
+        ></div>
+        <div
+          class="conversion-fill watchlist-fill"
+          [style.flex-grow]="watchlistService.stats().watchlistCount"
+          title="In watchlist"
+        ></div>
+      </div>
+
+      <div class="legend-row">
+        <div class="legend-item">
+          <span class="legend-dot watched-dot"></span>
+          <span class="legend-label">Watched</span>
+          <strong>{{ watchlistService.stats().watchedCount }}</strong>
+        </div>
+        <div class="legend-item">
+          <span class="legend-dot queue-dot"></span>
+          <span class="legend-label">In queue</span>
+          <strong>{{ watchlistService.stats().watchlistCount }}</strong>
+        </div>
+      </div>
+    </section>
+
+    <!-- Backup -->
+    <section class="stats-card">
+      <h3>Backup &amp; restore</h3>
+      <p class="card-desc">
+        Your library lives on this device and works offline. Export a copy to keep it safe or move it to another browser.
+      </p>
+
+      <div class="backup-actions">
+        <button class="btn-primary btn-sm" (click)="exportData()" id="btn-export-data">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          Export JSON
+        </button>
+
+        <label class="btn-secondary btn-sm file-upload-label" id="btn-import-data">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="17 8 12 3 7 8"></polyline>
+            <line x1="12" y1="3" x2="12" y2="15"></line>
+          </svg>
+          Import JSON
+          <input type="file" accept=".json" (change)="onFileSelected($event)" hidden />
+        </label>
+      </div>
+    </section>
+  </div>
+</div>

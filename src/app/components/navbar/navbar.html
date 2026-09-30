@@ -1,0 +1,90 @@
+<header class="navbar-wrapper glass-nav">
+  <div class="navbar-container">
+    <!-- Brand -->
+    <a routerLink="/discover" class="brand-logo" id="nav-brand" aria-label="CineTrack home">
+      <span class="logo-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none">
+          <circle cx="12" cy="12" r="9.25" stroke="currentColor" stroke-width="1.5" />
+          <circle cx="12" cy="7.5" r="1.9" fill="currentColor" />
+          <circle cx="12" cy="16.5" r="1.9" fill="currentColor" />
+          <circle cx="7.5" cy="12" r="1.9" fill="currentColor" />
+          <circle cx="16.5" cy="12" r="1.9" fill="currentColor" />
+        </svg>
+      </span>
+      <span class="brand-title">CineTrack</span>
+    </a>
+
+    <!-- Primary navigation (top pill on desktop, bottom tab bar on mobile) -->
+    <nav class="nav-links" aria-label="Primary">
+      <a routerLink="/discover" routerLinkActive="active-link" class="nav-link" id="nav-discover">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="nav-icon">
+          <circle cx="12" cy="12" r="9"></circle>
+          <polygon points="15.5 8.5 13.5 13.5 8.5 15.5 10.5 10.5 15.5 8.5" fill="currentColor" stroke-linejoin="round"></polygon>
+        </svg>
+        <span>Discover</span>
+      </a>
+
+      <a routerLink="/watchlist" routerLinkActive="active-link" class="nav-link" id="nav-watchlist">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="nav-icon">
+          <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" stroke-linejoin="round"></path>
+        </svg>
+        <span>Library</span>
+        @if (watchlistService.watchlist().length > 0) {
+          <span class="nav-counter" id="badge-watchlist">{{ watchlistService.watchlist().length }}</span>
+        }
+      </a>
+
+      <a routerLink="/reviews" routerLinkActive="active-link" class="nav-link" id="nav-reviews">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="nav-icon">
+          <path d="M4 5.5A1.5 1.5 0 0 1 5.5 4h13A1.5 1.5 0 0 1 20 5.5v9a1.5 1.5 0 0 1-1.5 1.5H9l-5 4z" stroke-linejoin="round"></path>
+          <line x1="8" y1="9" x2="16" y2="9"></line>
+          <line x1="8" y1="12" x2="13" y2="12"></line>
+        </svg>
+        <span>Diary</span>
+        @if (watchlistService.reviews().length > 0) {
+          <span class="nav-counter" id="badge-reviews">{{ watchlistService.reviews().length }}</span>
+        }
+      </a>
+
+      <a routerLink="/stats" routerLinkActive="active-link" class="nav-link" id="nav-stats">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="nav-icon">
+          <line x1="6" y1="20" x2="6" y2="13"></line>
+          <line x1="12" y1="20" x2="12" y2="5"></line>
+          <line x1="18" y1="20" x2="18" y2="10"></line>
+        </svg>
+        <span>Stats</span>
+      </a>
+    </nav>
+
+    <!-- Actions -->
+    <div class="nav-actions">
+      @if (!isOnline()) {
+        <div class="offline-tag" title="You're offline. Cached data is still available.">
+          <span class="offline-dot"></span>
+          <span>Offline</span>
+        </div>
+      }
+
+      <button
+        class="settings-trigger-btn"
+        (click)="openSettings()"
+        id="btn-open-settings"
+        [title]="watchlistService.apiKey() ? 'TMDB connected' : 'Using the built-in catalog'"
+      >
+        <span class="key-status-dot" [class.connected]="!!watchlistService.apiKey()"></span>
+        <span class="settings-label">{{ watchlistService.apiKey() ? 'TMDB Live' : 'Demo catalog' }}</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="settings-icon">
+          <line x1="4" y1="7" x2="20" y2="7"></line>
+          <line x1="4" y1="17" x2="20" y2="17"></line>
+          <circle cx="9" cy="7" r="2.4" fill="var(--surface-card)"></circle>
+          <circle cx="15" cy="17" r="2.4" fill="var(--surface-card)"></circle>
+        </svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- Settings Modal -->
+@if (showSettings()) {
+  <app-settings-modal (closeModal)="closeSettings()"></app-settings-modal>
+}
