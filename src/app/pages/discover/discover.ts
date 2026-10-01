@@ -1,7 +1,8 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule, AsyncPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { Subscription } from 'rxjs';
 import { MovieSearchService } from '../../core/services/movie-search.service';
 import { WatchlistService } from '../../core/services/watchlist.service';
 import { TmdbService } from '../../core/services/tmdb.service';
@@ -16,22 +17,28 @@ import { Movie } from '../../core/models/movie.model';
   templateUrl: './discover.html',
   styleUrl: './discover.css',
 })
-export class DiscoverComponent {
+export class DiscoverComponent implements OnInit, OnDestroy {
   protected readonly searchService = inject(MovieSearchService);
   protected readonly watchlistService = inject(WatchlistService);
   protected readonly tmdbService = inject(TmdbService);
 
-  // Search input binding
-  searchInput = '';
   selectedGenreId: number | null = null;
   activeReviewMovie = signal<Movie | null>(null);
+  currentQuery = signal<string>('');
 
-  onSearchChange(): void {
-    this.searchService.setQuery(this.searchInput);
+  private querySub?: Subscription;
+
+  ngOnInit(): void {
+    this.querySub = this.searchService.query$.subscribe((q) => {
+      this.currentQuery.set(q);
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.querySub?.unsubscribe();
   }
 
   clearSearch(): void {
-    this.searchInput = '';
     this.searchService.clearQuery();
   }
 
@@ -41,7 +48,6 @@ export class DiscoverComponent {
   }
 
   setTab(tab: 'trending' | 'topRated' | 'nowPlaying'): void {
-    this.searchInput = '';
     this.searchService.setActiveTab(tab);
   }
 

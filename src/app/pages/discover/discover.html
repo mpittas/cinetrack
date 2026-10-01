@@ -1,9 +1,12 @@
 <div class="discover-container">
-  <!-- Featured hero -->
-  @if (searchService.heroMovie$ | async; as hero) {
-    @if (!searchInput) {
+  <!-- Featured hero (only when not actively searching) -->
+  @if (!currentQuery()) {
+    @if (searchService.heroMovie$ | async; as hero) {
       <section class="hero-banner">
-        <div class="hero-backdrop" [style.background-image]="'url(' + tmdbService.getImageUrl(hero.backdrop_path, 'original') + ')'"></div>
+        <div
+          class="hero-backdrop"
+          [style.background-image]="'url(' + tmdbService.getImageUrl(hero.backdrop_path, 'original') + ')'"
+        ></div>
         <div class="hero-gradient-overlay"></div>
 
         <div class="hero-content animate-fade-in">
@@ -44,7 +47,12 @@
               (click)="toggleHeroWatchlist(hero)"
               id="btn-hero-watchlist"
             >
-              <svg viewBox="0 0 24 24" [attr.fill]="watchlistService.isInWatchlist(hero.id) ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="2">
+              <svg
+                viewBox="0 0 24 24"
+                [attr.fill]="watchlistService.isInWatchlist(hero.id) ? 'currentColor' : 'none'"
+                stroke="currentColor"
+                stroke-width="2"
+              >
                 <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
               </svg>
               <span>{{ watchlistService.isInWatchlist(hero.id) ? 'On watchlist' : 'Watchlist' }}</span>
@@ -68,85 +76,117 @@
     }
   }
 
-  <!-- Browse -->
-  <div class="content-wrapper" [class.no-hero]="!!searchInput">
-    <div class="browse-header">
-      @if (searchService.activeTab$ | async; as activeTab) {
-        <div class="segmented" role="tablist" aria-label="Collections">
-          <button type="button" role="tab" [class.active]="activeTab === 'trending'" [attr.aria-selected]="activeTab === 'trending'" (click)="setTab('trending')" id="tab-trending">
-            Trending
+  <!-- Catalog Section -->
+  <div class="content-wrapper" [class.no-hero]="!!currentQuery()">
+    <!-- If searching: prominent search header -->
+    @if (currentQuery()) {
+      <div class="search-active-banner animate-fade-in">
+        <div class="search-banner-text">
+          <span class="search-tag">Global Search</span>
+          <h2 class="search-query-heading">
+            Results for <em>“{{ currentQuery() }}”</em>
+          </h2>
+        </div>
+        <button type="button" class="btn-secondary btn-sm" (click)="clearSearch()" id="btn-clear-search">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" class="icon-sm">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+          <span>Clear search</span>
+        </button>
+      </div>
+    } @else {
+      <!-- Category Tabs -->
+      <div class="browse-header">
+        @if (searchService.activeTab$ | async; as activeTab) {
+          <div class="segmented" role="tablist" aria-label="Collections">
+            <button
+              type="button"
+              role="tab"
+              [class.active]="activeTab === 'trending'"
+              [attr.aria-selected]="activeTab === 'trending'"
+              (click)="setTab('trending')"
+              id="tab-trending"
+            >
+              Trending this week
+            </button>
+            <button
+              type="button"
+              role="tab"
+              [class.active]="activeTab === 'topRated'"
+              [attr.aria-selected]="activeTab === 'topRated'"
+              (click)="setTab('topRated')"
+              id="tab-toprated"
+            >
+              Top rated
+            </button>
+            <button
+              type="button"
+              role="tab"
+              [class.active]="activeTab === 'nowPlaying'"
+              [attr.aria-selected]="activeTab === 'nowPlaying'"
+              (click)="setTab('nowPlaying')"
+              id="tab-nowplaying"
+            >
+              In theaters
+            </button>
+          </div>
+        }
+      </div>
+
+      <!-- Genres Row -->
+      @if (searchService.genres$ | async; as genres) {
+        <div class="chip-row genre-row">
+          <button
+            type="button"
+            class="badge-tag"
+            [class.is-active]="selectedGenreId === null"
+            (click)="setGenre(null)"
+          >
+            All genres
           </button>
-          <button type="button" role="tab" [class.active]="activeTab === 'topRated'" [attr.aria-selected]="activeTab === 'topRated'" (click)="setTab('topRated')" id="tab-toprated">
-            Top rated
-          </button>
-          <button type="button" role="tab" [class.active]="activeTab === 'nowPlaying'" [attr.aria-selected]="activeTab === 'nowPlaying'" (click)="setTab('nowPlaying')" id="tab-nowplaying">
-            In theaters
-          </button>
+          @for (g of genres; track g.id) {
+            <button
+              type="button"
+              class="badge-tag"
+              [class.is-active]="selectedGenreId === g.id"
+              (click)="setGenre(g.id)"
+            >
+              {{ g.name }}
+            </button>
+          }
         </div>
       }
-
-      <div class="search-field browse-search">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="11" cy="11" r="7"></circle>
-          <line x1="20" y1="20" x2="16.5" y2="16.5"></line>
-        </svg>
-        <input
-          type="search"
-          [(ngModel)]="searchInput"
-          (input)="onSearchChange()"
-          placeholder="Search films"
-          id="search-movies-input"
-          aria-label="Search films"
-        />
-        @if (searchInput) {
-          <button type="button" class="search-clear" (click)="clearSearch()" aria-label="Clear search">&times;</button>
-        }
-      </div>
-    </div>
-
-    @if (searchService.genres$ | async; as genres) {
-      <div class="chip-row genre-row">
-        <button type="button" class="badge-tag" [class.is-active]="selectedGenreId === null" (click)="setGenre(null)">
-          All genres
-        </button>
-        @for (g of genres; track g.id) {
-          <button type="button" class="badge-tag" [class.is-active]="selectedGenreId === g.id" (click)="setGenre(g.id)">
-            {{ g.name }}
-          </button>
-        }
-      </div>
     }
 
+    <!-- Loading State -->
     @if (searchService.loading$ | async) {
       <div class="loading-state">
         <div class="spinner lg"></div>
-        <p>Loading films…</p>
+        <p>Fetching films…</p>
       </div>
     }
 
+    <!-- Movies Grid -->
     @if (searchService.movies$ | async; as movies) {
-      <div class="section-heading">
-        <h2>
-          @if (searchInput) {
-            Results for <em>“{{ searchInput }}”</em>
-          } @else {
-            Now showing
-          }
-        </h2>
-        <span class="count">{{ movies.length }} titles</span>
-      </div>
+      @if (!currentQuery()) {
+        <div class="section-heading">
+          <h2>Now showing</h2>
+          <span class="count">{{ movies.length }} titles</span>
+        </div>
+      }
 
       @if (movies.length > 0) {
-        <div class="poster-grid">
+        <div class="poster-grid animate-fade-in">
           @for (movie of movies; track movie.id) {
             <app-movie-card [movie]="movie" (openReviewModal)="openReview($event)"></app-movie-card>
           }
         </div>
       } @else {
-        <div class="empty-state">
-          <h3>Nothing matches</h3>
-          <p>Try a different title or clear the genre filter.</p>
-          <button class="btn-secondary btn-sm" (click)="clearSearch()">Reset filters</button>
+        <div class="empty-state animate-fade-in">
+          <h3>No films match your search</h3>
+          <p>Try searching for a different title, actor, or clearing the selected genre filter.</p>
+          <button class="btn-secondary btn-sm" (click)="clearSearch()">Reset search</button>
         </div>
       }
     }

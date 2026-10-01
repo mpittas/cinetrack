@@ -56,8 +56,142 @@
       </a>
     </nav>
 
+    <!-- Global Header Search -->
+    <div class="nav-search-wrapper" #searchContainerRef [class.mobile-open]="isMobileSearchOpen()">
+      <div class="header-search-bar" [class.focused]="isDropdownOpen()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="search-lens-icon">
+          <circle cx="11" cy="11" r="7"></circle>
+          <line x1="20" y1="20" x2="16.5" y2="16.5"></line>
+        </svg>
+
+        <input
+          #searchInputRef
+          type="text"
+          class="header-search-input"
+          [value]="searchQuery()"
+          (input)="onSearchInput($any($event.target).value)"
+          (focus)="onSearchFocus()"
+          (keydown)="onSearchKeydown($event)"
+          placeholder="Search films, directors..."
+          id="header-search-input"
+          autocomplete="off"
+          spellcheck="false"
+          aria-label="Search films globally"
+        />
+
+        @if (isSearching()) {
+          <div class="search-mini-spinner"></div>
+        } @else if (searchQuery()) {
+          <button
+            type="button"
+            class="search-clear-btn"
+            (click)="clearSearch()"
+            aria-label="Clear search query"
+          >
+            &times;
+          </button>
+        } @else {
+          <kbd class="search-shortcut-badge" aria-hidden="true">{{ isMac ? '⌘K' : 'Ctrl+K' }}</kbd>
+        }
+      </div>
+
+      <!-- Instant Predictive Search Dropdown -->
+      @if (isDropdownOpen()) {
+        <div class="search-dropdown-menu animate-fade-in" role="listbox" id="header-search-dropdown">
+          @if (isSearching() && searchResults().length === 0) {
+            <div class="dropdown-status-box">
+              <span class="spinner inline"></span>
+              <span>Searching films...</span>
+            </div>
+          } @else if (searchResults().length > 0) {
+            <div class="dropdown-section-label">Films</div>
+            <div class="dropdown-results-list">
+              @for (m of searchResults(); track m.id; let idx = $index) {
+                <div
+                  class="dropdown-item"
+                  [class.is-highlighted]="idx === highlightedIndex()"
+                  (click)="selectMovie(m)"
+                  (mouseenter)="highlightedIndex.set(idx)"
+                  role="option"
+                  [attr.aria-selected]="idx === highlightedIndex()"
+                >
+                  <img
+                    [src]="tmdbService.getImageUrl(m.poster_path, 'w185')"
+                    [alt]="m.title"
+                    class="dropdown-poster"
+                    (error)="onPosterError($event)"
+                  />
+                  <div class="dropdown-item-meta">
+                    <span class="dropdown-item-title">{{ m.title }}</span>
+                    <div class="dropdown-item-sub">
+                      @if (m.release_date) {
+                        <span>{{ m.release_date.substring(0, 4) }}</span>
+                      }
+                      @if (m.vote_average) {
+                        <span class="dot-sep"></span>
+                        <span class="dropdown-rating">
+                          <svg viewBox="0 0 24 24" fill="currentColor" class="star-icon">
+                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                          </svg>
+                          {{ m.vote_average.toFixed(1) }}
+                        </span>
+                      }
+                      @if (watchlistService.isWatched(m.id)) {
+                        <span class="status-tag watched">Watched</span>
+                      } @else if (watchlistService.isInWatchlist(m.id)) {
+                        <span class="status-tag queued">Queued</span>
+                      }
+                    </div>
+                  </div>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="arrow-jump-icon">
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                    <polyline points="12 5 19 12 12 19"></polyline>
+                  </svg>
+                </div>
+              }
+            </div>
+
+            <!-- Footer: View all on Discover -->
+            <div class="dropdown-footer">
+              <button type="button" class="btn-view-all" (click)="viewAllInDiscover()">
+                <span>View all results for “<strong>{{ searchQuery() }}</strong>”</span>
+                <kbd class="return-kbd">↵</kbd>
+              </button>
+              <div class="dropdown-hints">
+                <span><kbd>↑</kbd><kbd>↓</kbd> navigate</span>
+                <span><kbd>↵</kbd> select</span>
+                <span><kbd>esc</kbd> close</span>
+              </div>
+            </div>
+          } @else if (!isSearching() && searchQuery().trim()) {
+            <div class="dropdown-status-box empty">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="empty-icon">
+                <circle cx="11" cy="11" r="7"></circle>
+                <line x1="20" y1="20" x2="16.5" y2="16.5"></line>
+              </svg>
+              <span>No films found for “{{ searchQuery() }}”</span>
+            </div>
+          }
+        </div>
+      }
+    </div>
+
     <!-- Actions -->
     <div class="nav-actions">
+      <!-- Mobile Search Toggle -->
+      <button
+        type="button"
+        class="mobile-search-trigger"
+        (click)="toggleMobileSearch()"
+        aria-label="Toggle mobile search"
+        id="btn-mobile-search-toggle"
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="7"></circle>
+          <line x1="20" y1="20" x2="16.5" y2="16.5"></line>
+        </svg>
+      </button>
+
       @if (!isOnline()) {
         <div class="offline-tag" title="You're offline. Cached data is still available.">
           <span class="offline-dot"></span>
@@ -69,7 +203,7 @@
         class="settings-trigger-btn"
         (click)="openSettings()"
         id="btn-open-settings"
-        [title]="watchlistService.apiKey() ? 'TMDB connected' : 'Using the built-in catalog'"
+        [title]="watchlistService.apiKey() ? 'TMDB API connected' : 'Using the built-in catalog'"
       >
         <span class="key-status-dot" [class.connected]="!!watchlistService.apiKey()"></span>
         <span class="settings-label">{{ watchlistService.apiKey() ? 'TMDB Live' : 'Demo catalog' }}</span>
