@@ -1,9 +1,7 @@
 <div class="page-shell">
   <header class="page-header">
     <div>
-      <span class="eyebrow">Your collection</span>
       <h1 class="page-title">Library</h1>
-      <p class="page-subtitle">Everything you've queued up, watched, and loved.</p>
     </div>
 
     <dl class="stats-mini-summary">
@@ -151,11 +149,6 @@
     }
   } @else {
     <div class="empty-state animate-fade-in">
-      <div class="empty-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-          <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
-        </svg>
-      </div>
       <h3>
         @switch (activeTab()) {
           @case ('watched') { Nothing watched yet }

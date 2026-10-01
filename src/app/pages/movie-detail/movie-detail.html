@@ -6,14 +6,7 @@
 } @else if (errorMessage()) {
   <div class="detail-error-wrapper">
     <div class="empty-state">
-      <div class="empty-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="12" cy="12" r="10"></circle>
-          <line x1="12" y1="8" x2="12" y2="12"></line>
-          <line x1="12" y1="16" x2="12.01" y2="16"></line>
-        </svg>
-      </div>
-      <h3>Film Not Found</h3>
+      <h3>Film not found</h3>
       <p>{{ errorMessage() }}</p>
       <a routerLink="/discover" class="btn-primary btn-sm">Return to Discover</a>
     </div>
@@ -61,11 +54,11 @@
                 <span>Watched</span>
               </div>
             } @else if (watchlistService.isInWatchlist(m.id)) {
-              <div class="watchlist-overlay-badge" title="In Watchlist">
+              <div class="watchlist-overlay-badge" title="In watchlist">
                 <svg viewBox="0 0 24 24" fill="currentColor">
                   <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
                 </svg>
-                <span>In Watchlist</span>
+                <span>In watchlist</span>
               </div>
             }
 
@@ -120,7 +113,7 @@
           <h1 class="movie-main-title">{{ m.title }}</h1>
 
           @if (m.original_title && m.original_title !== m.title) {
-            <p class="movie-original-title">Original Title: <em>{{ m.original_title }}</em></p>
+            <p class="movie-original-title">Original title: <em>{{ m.original_title }}</em></p>
           }
 
           @if (m.tagline) {
@@ -187,7 +180,7 @@
               <svg viewBox="0 0 24 24" [attr.fill]="watchlistService.isInWatchlist(m.id) ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="2">
                 <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
               </svg>
-              <span>{{ watchlistService.isInWatchlist(m.id) ? 'In Watchlist' : 'Watchlist' }}</span>
+              <span>{{ watchlistService.isInWatchlist(m.id) ? 'On watchlist' : 'Watchlist' }}</span>
             </button>
 
             <button
@@ -288,8 +281,8 @@
       @if (userReview; as rev) {
         <section class="user-review-box animate-fade-in">
           <div class="review-box-header">
-            <div>
-              <span class="eyebrow">Your review · {{ rev.createdAt | date: 'mediumDate' }}</span>
+            <div class="review-box-meta">
+              <h2>Your review</h2>
               <div class="stars">
                 @for (s of [1, 2, 3, 4, 5]; track s) {
                   <svg viewBox="0 0 24 24" [class.filled]="s <= rev.rating" fill="currentColor">
@@ -297,6 +290,7 @@
                   </svg>
                 }
               </div>
+              <span class="review-box-date">{{ rev.createdAt | date: 'mediumDate' }}</span>
             </div>
 
             <div class="rev-box-actions">
@@ -328,7 +322,7 @@
                 <span class="badge-tag">{{ t }}</span>
               }
               @if (rev.rewatch) {
-                <span class="badge-tag rewatch">↻ Would rewatch</span>
+                <span class="badge-tag rewatch"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon-inline" aria-hidden="true"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg> Would rewatch</span>
               }
             </div>
           }
@@ -338,12 +332,12 @@
       <!-- Production Details & Key Facts Grid -->
       <section class="detail-section facts-section">
         <div class="section-heading">
-          <h2>Film Facts & Production</h2>
+          <h2>Details</h2>
         </div>
 
         <div class="facts-grid">
           <div class="fact-card">
-            <span class="fact-label">Release Date</span>
+            <span class="fact-label">Release date</span>
             <span class="fact-value">{{ formatDate(m.release_date) || '—' }}</span>
           </div>
 
@@ -363,13 +357,13 @@
           </div>
 
           <div class="fact-card">
-            <span class="fact-label">Box Office Revenue</span>
+            <span class="fact-label">Box office</span>
             <span class="fact-value">{{ formatCurrency(m.revenue) }}</span>
           </div>
 
           @if (m.spoken_languages && m.spoken_languages.length > 0) {
             <div class="fact-card">
-              <span class="fact-label">Original & Spoken Languages</span>
+              <span class="fact-label">Languages</span>
               <span class="fact-value">
                 {{ m.spoken_languages[0].english_name }}
                 @if (m.spoken_languages.length > 1) {
@@ -381,7 +375,7 @@
 
           @if (m.production_countries && m.production_countries.length > 0) {
             <div class="fact-card">
-              <span class="fact-label">Production Countries</span>
+              <span class="fact-label">Countries</span>
               <span class="fact-value">
                 @for (c of m.production_countries; track c.iso_3166_1) {
                   <span class="fact-pill">{{ c.name }}</span>
@@ -392,7 +386,7 @@
 
           @if (m.production_companies && m.production_companies.length > 0) {
             <div class="fact-card span-full">
-              <span class="fact-label">Production Studios</span>
+              <span class="fact-label">Studios</span>
               <div class="studios-list">
                 @for (company of m.production_companies; track company.id) {
                   <span class="studio-badge">{{ company.name }}</span>
@@ -407,7 +401,7 @@
       @if (castMembers().length > 0) {
         <section class="detail-section">
           <div class="section-heading">
-            <h2>Top Cast</h2>
+            <h2>Top cast</h2>
             <span class="count">{{ castMembers().length }} actors</span>
           </div>
           <div class="cast-scroll-track">
@@ -443,7 +437,7 @@
       @if (m.videos?.results && m.videos!.results.length > 1) {
         <section class="detail-section">
           <div class="section-heading">
-            <h2>Videos & Trailers</h2>
+            <h2>Videos &amp; trailers</h2>
             <span class="count">{{ m.videos!.results.length }} clips</span>
           </div>
 
@@ -477,7 +471,7 @@
       @if (relatedMovies().length > 0) {
         <section class="detail-section">
           <div class="section-heading">
-            <h2>More Like This</h2>
+            <h2>More like this</h2>
             <span class="count">{{ relatedMovies().length }} titles</span>
           </div>
           <div class="poster-grid">

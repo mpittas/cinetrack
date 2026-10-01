@@ -16,87 +16,50 @@
 
 .alert-banner svg { width: 18px; height: 18px; flex-shrink: 0; }
 
-/* Bento */
-.metrics-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
-  margin-bottom: 12px;
+/* Ledger */
+.ledger {
+  margin-bottom: clamp(40px, 6vw, 64px);
+  border-top: 1px solid var(--border-medium);
 }
 
-.metric-cell {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  gap: 24px;
-  min-height: 150px;
-  padding: 22px;
-  border-radius: var(--radius-lg);
-  background: var(--surface-card);
-  border: 1px solid var(--border-subtle);
-}
-
-.hero-metric {
-  grid-column: span 2;
-  grid-row: span 2;
-  background:
-    radial-gradient(120% 90% at 100% 0%, rgba(244, 183, 64, 0.18), transparent 60%),
-    var(--surface-card);
-  border-color: var(--accent-gold-border);
-}
-
-.metric-title {
-  font-size: 0.74rem;
-  font-weight: 600;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--text-tertiary);
-}
-
-.metric-value {
+.ledger-row {
   display: flex;
   align-items: baseline;
-  gap: 8px;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border-subtle);
 }
 
-.metric-number {
+.ledger-row dt {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+}
+
+.ledger-row dd {
   font-family: var(--font-display);
-  font-size: clamp(2.8rem, 5vw, 3.6rem);
-  line-height: 0.9;
+  font-size: clamp(2rem, 4vw, 2.6rem);
+  line-height: 1;
   font-variant-numeric: tabular-nums;
 }
 
-.hero-metric .metric-number {
-  font-size: clamp(5rem, 12vw, 8.5rem);
-  color: var(--accent-gold);
-}
-
-.metric-unit {
+.ledger-unit {
+  margin-left: 8px;
+  font-family: var(--font-body);
   font-size: 0.9rem;
-  color: var(--text-secondary);
-}
-
-.hero-metric .metric-unit { font-size: 1.1rem; }
-
-.metric-foot {
-  font-size: 0.88rem;
-  color: var(--text-secondary);
+  color: var(--text-tertiary);
 }
 
 /* Cards */
 .stats-sub-layout {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px;
+  gap: clamp(32px, 6vw, 72px);
 }
 
 .stats-card {
   display: flex;
   flex-direction: column;
-  padding: 24px;
-  border-radius: var(--radius-lg);
-  background: var(--surface-card);
-  border: 1px solid var(--border-subtle);
 }
 
 .stats-card h3 {
@@ -114,8 +77,8 @@
 
 .conversion-bar {
   display: flex;
-  gap: 4px;
-  height: 14px;
+  gap: 3px;
+  height: 8px;
   margin-bottom: 18px;
   border-radius: var(--radius-full);
   background: rgba(255, 255, 255, 0.06);
@@ -172,11 +135,5 @@
 .file-upload-label { cursor: pointer; }
 
 @media (max-width: 860px) {
-  .metrics-grid { grid-template-columns: 1fr 1fr; }
-  .hero-metric { grid-row: auto; }
   .stats-sub-layout { grid-template-columns: 1fr; }
-}
-
-@media (max-width: 480px) {
-  .metric-cell { min-height: 120px; padding: 18px; }
 }

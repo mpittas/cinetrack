@@ -60,9 +60,7 @@
   height: 24px;
   padding: 0 8px;
   border-radius: var(--radius-full);
-  background: rgba(10, 10, 11, 0.62);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background: rgba(10, 10, 11, 0.74);
   color: var(--text-primary);
   font-size: 0.75rem;
   font-weight: 600;
@@ -131,16 +129,14 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.14);
+  background: rgba(10, 10, 11, 0.78);
   border: 1px solid rgba(255, 255, 255, 0.16);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
   color: var(--text-primary);
   transition: background var(--transition-fast), transform var(--transition-fast), color var(--transition-fast);
 }
 
 .card-action-btn:hover {
-  background: rgba(255, 255, 255, 0.26);
+  background: rgba(40, 40, 46, 0.95);
   transform: scale(1.08);
 }
 

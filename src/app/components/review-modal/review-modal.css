@@ -5,8 +5,6 @@
   min-width: 0;
 }
 
-.movie-info-wrap .eyebrow { margin-bottom: 4px; }
-
 .movie-info-wrap h3 {
   overflow: hidden;
   text-overflow: ellipsis;

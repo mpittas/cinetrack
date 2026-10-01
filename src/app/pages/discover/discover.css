@@ -47,24 +47,6 @@
   margin: 0 auto;
 }
 
-.hero-eyebrow {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 0.74rem;
-  font-weight: 600;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--accent-gold);
-  margin-bottom: 18px;
-}
-
-.eyebrow-line {
-  width: 28px;
-  height: 1px;
-  background: currentColor;
-}
-
 .hero-title {
   font-family: var(--font-display);
   font-weight: 400;

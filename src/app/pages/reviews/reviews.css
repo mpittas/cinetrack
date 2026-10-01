@@ -6,11 +6,10 @@
   grid-template-columns: 240px 1fr;
   gap: clamp(24px, 5vw, 56px);
   align-items: center;
-  padding: clamp(24px, 4vw, 36px);
-  margin-bottom: 28px;
-  border-radius: var(--radius-lg);
-  background: radial-gradient(120% 140% at 0% 0%, rgba(244, 183, 64, 0.1), transparent 55%), var(--surface-card);
-  border: 1px solid var(--border-subtle);
+  padding: clamp(20px, 3vw, 32px) 0;
+  margin-bottom: 24px;
+  border-top: 1px solid var(--border-medium);
+  border-bottom: 1px solid var(--border-subtle);
 }
 
 .score-card {
@@ -99,7 +98,6 @@
   justify-content: space-between;
   gap: 16px;
   padding-bottom: 20px;
-  margin-bottom: 8px;
   border-bottom: 1px solid var(--border-subtle);
 }
 
@@ -179,6 +177,9 @@
 }
 
 .rewatch-flag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   font-size: 0.76rem;
   font-weight: 500;
   color: var(--accent-gold);
@@ -214,9 +215,6 @@
 }
 
 .rev-tags-list .badge-tag { padding: 4px 10px; font-size: 0.76rem; }
-
-.reviews-feed + .empty-state,
-.reviews-toolbar + .empty-state { margin-top: 24px; }
 
 @media (max-width: 760px) {
   .breakdown-dashboard { grid-template-columns: 1fr; }
