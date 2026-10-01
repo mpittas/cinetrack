@@ -80,6 +80,37 @@
           <circle cx="15" cy="17" r="2.4" fill="var(--surface-card)"></circle>
         </svg>
       </button>
+
+      <!-- User Profile / Auth Action -->
+      @if (authService.isAuthenticated()) {
+        <button
+          class="user-profile-btn"
+          (click)="openProfile()"
+          id="btn-open-profile"
+          [title]="'Personal profile: ' + authService.userDisplayName()"
+        >
+          <span class="user-avatar-badge">{{ authService.userInitials() }}</span>
+          <span class="user-name-label">{{ authService.userDisplayName() }}</span>
+          @if (watchlistService.isSyncing()) {
+            <span class="sync-mini-dot syncing" title="Syncing to cloud..."></span>
+          } @else {
+            <span class="sync-mini-dot synced" title="Synced with cloud"></span>
+          }
+        </button>
+      } @else {
+        <button
+          class="btn-signin"
+          (click)="openAuth()"
+          id="btn-open-auth"
+          title="Sign in or register to sync your library to your personal profile"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="signin-icon">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+          <span class="signin-label">Sign in</span>
+        </button>
+      }
     </div>
   </div>
 </header>
@@ -87,4 +118,14 @@
 <!-- Settings Modal -->
 @if (showSettings()) {
   <app-settings-modal (closeModal)="closeSettings()"></app-settings-modal>
+}
+
+<!-- Auth Modal (Sign in / Register) -->
+@if (showAuth()) {
+  <app-auth-modal (closeModal)="closeAuth()"></app-auth-modal>
+}
+
+<!-- User Personal Profile Modal -->
+@if (showProfile()) {
+  <app-profile-modal (closeModal)="closeProfile()"></app-profile-modal>
 }

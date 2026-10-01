@@ -1,5 +1,7 @@
-import { Injectable, signal, computed, effect } from '@angular/core';
+import { Injectable, signal, computed, effect, inject } from '@angular/core';
 import { Movie, TrackerItem, UserReview } from '../models/movie.model';
+import { AuthService } from './auth.service';
+import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 
 const STORAGE_KEYS = {
   ITEMS: 'cinetrack_items_v2',
@@ -158,10 +160,19 @@ const INITIAL_ITEMS: TrackerItem[] = [
   providedIn: 'root',
 })
 export class WatchlistService {
+  protected readonly authService = inject(AuthService);
+
   // Service-based state using Angular Signals
   readonly trackerItems = signal<TrackerItem[]>(this.loadItems());
   readonly reviews = signal<UserReview[]>(this.loadReviews());
   readonly apiKey = signal<string>(this.loadApiKey());
+
+  // Cloud sync status
+  readonly isSyncing = signal<boolean>(false);
+  readonly lastSyncedAt = signal<string | null>(null);
+  private cloudSyncTimer: any = null;
+  private isApplyingRemoteUpdate = false;
+  private isInitialized = false;
 
   // Computed state slices
   readonly watchlist = computed(() =>
@@ -234,6 +245,92 @@ export class WatchlistService {
         console.warn('Failed to persist API key', err);
       }
     });
+
+    // React to Firebase auth state changes
+    effect(() => {
+      const user = this.authService.user();
+      if (user) {
+        this.loadUserDataFromCloud(user.uid);
+      }
+    });
+
+    // Auto-sync changes to Firestore when user is logged in
+    effect(() => {
+      const items = this.trackerItems();
+      const reviews = this.reviews();
+      const user = this.authService.user();
+
+      if (user && this.isInitialized && !this.isApplyingRemoteUpdate) {
+        this.scheduleCloudSync(user.uid, items, reviews);
+      }
+    });
+  }
+
+  private async loadUserDataFromCloud(uid: string): Promise<void> {
+    try {
+      this.isSyncing.set(true);
+      const userDocRef = doc(this.authService.firestore, 'users', uid);
+      const snapshot = await getDoc(userDocRef);
+
+      if (snapshot.exists()) {
+        const data = snapshot.data();
+        if (data['items'] && Array.isArray(data['items']) && data['items'].length > 0) {
+          this.isApplyingRemoteUpdate = true;
+          this.trackerItems.set(data['items']);
+          if (data['reviews'] && Array.isArray(data['reviews'])) {
+            this.reviews.set(data['reviews']);
+          }
+          this.isApplyingRemoteUpdate = false;
+          this.lastSyncedAt.set(new Date().toISOString());
+          this.isInitialized = true;
+          return;
+        }
+      }
+
+      // If user is brand new or doc has no items yet, upload current local items to seed their cloud library
+      await this.saveToCloud(uid, this.trackerItems(), this.reviews());
+      this.isInitialized = true;
+    } catch (e) {
+      console.warn('Error syncing data from Firestore:', e);
+    } finally {
+      this.isSyncing.set(false);
+    }
+  }
+
+  private scheduleCloudSync(uid: string, items: TrackerItem[], reviews: UserReview[]): void {
+    if (this.cloudSyncTimer) {
+      clearTimeout(this.cloudSyncTimer);
+    }
+    this.cloudSyncTimer = setTimeout(() => {
+      this.saveToCloud(uid, items, reviews);
+    }, 1000);
+  }
+
+  async syncToCloud(): Promise<void> {
+    const user = this.authService.user();
+    if (!user) return;
+    await this.saveToCloud(user.uid, this.trackerItems(), this.reviews());
+  }
+
+  private async saveToCloud(uid: string, items: TrackerItem[], reviews: UserReview[]): Promise<void> {
+    try {
+      this.isSyncing.set(true);
+      const userDocRef = doc(this.authService.firestore, 'users', uid);
+      await setDoc(
+        userDocRef,
+        {
+          items,
+          reviews,
+          updatedAt: serverTimestamp(),
+        },
+        { merge: true }
+      );
+      this.lastSyncedAt.set(new Date().toISOString());
+    } catch (e) {
+      console.warn('Error saving data to Firestore:', e);
+    } finally {
+      this.isSyncing.set(false);
+    }
   }
 
   // --- Watchlist / Item Actions ---

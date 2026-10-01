@@ -1,0 +1,110 @@
+<div class="modal-backdrop" (click)="onBackdropClick($event)">
+  <div class="modal-container profile-modal" role="dialog" aria-modal="true" aria-labelledby="profile-modal-title">
+    <div class="modal-header">
+      <div>
+        <span class="eyebrow">Personal Profile</span>
+        <h3 id="profile-modal-title">{{ authService.userDisplayName() }}</h3>
+        <p class="modal-subtitle">{{ authService.userEmail() }}</p>
+      </div>
+      <button class="btn-close" (click)="closeModal.emit()" id="btn-close-profile" aria-label="Close">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+
+    <div class="modal-body profile-body">
+      <!-- User badge card -->
+      <div class="user-card">
+        <div class="avatar-large">
+          <span>{{ authService.userInitials() }}</span>
+        </div>
+        <div class="user-meta">
+          <div class="user-name-line">
+            <span class="display-name">{{ authService.userDisplayName() }}</span>
+            <span class="member-tag">Cinephile</span>
+          </div>
+          <span class="user-email-text">{{ authService.userEmail() }}</span>
+          <div class="sync-status-indicator">
+            <span class="dot-pulse"></span>
+            <span>Cloud Connected (Firebase Firestore)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Profile Ledger -->
+      <div class="profile-stats-grid">
+        <div class="stat-box">
+          <span class="stat-number">{{ watchlistService.stats().watchedCount }}</span>
+          <span class="stat-label">Watched</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-number">{{ watchlistService.stats().watchlistCount }}</span>
+          <span class="stat-label">Queue</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-number">{{ watchlistService.stats().reviewsCount }}</span>
+          <span class="stat-label">Reviews</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-number">{{ watchlistService.stats().totalHours }}h</span>
+          <span class="stat-label">Hours</span>
+        </div>
+      </div>
+
+      <!-- Cloud Sync details -->
+      <div class="sync-card">
+        <div class="sync-card-info">
+          <div class="sync-title-row">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="sync-icon">
+              <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path>
+            </svg>
+            <strong>Personal Cloud Storage</strong>
+          </div>
+          <p class="sync-desc">
+            All your watchlist items, review diary entries, custom ratings, and watch progress are tied to your Firebase user profile.
+          </p>
+          @if (watchlistService.lastSyncedAt()) {
+            <span class="sync-timestamp">Last synced: {{ watchlistService.lastSyncedAt() | date:'mediumTime' }}</span>
+          }
+        </div>
+
+        <button
+          type="button"
+          class="btn-secondary sync-btn"
+          (click)="manualSync()"
+          [disabled]="watchlistService.isSyncing()"
+          id="btn-manual-sync"
+        >
+          @if (watchlistService.isSyncing()) {
+            <span class="spinner inline"></span>
+            <span>Syncing...</span>
+          } @else if (syncSuccess()) {
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" class="check-icon">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+            <span>Synced!</span>
+          } @else {
+            <span>Sync now</span>
+          }
+        </button>
+      </div>
+    </div>
+
+    <div class="modal-footer profile-footer">
+      <button type="button" class="btn-ghost danger" (click)="onSignOut()" id="btn-signout">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="logout-icon">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+          <polyline points="16 17 21 12 16 7"></polyline>
+          <line x1="21" y1="12" x2="9" y2="12"></line>
+        </svg>
+        <span>Sign out</span>
+      </button>
+
+      <button type="button" class="btn-primary" (click)="closeModal.emit()" id="btn-close-profile-done">
+        Done
+      </button>
+    </div>
+  </div>
+</div>
