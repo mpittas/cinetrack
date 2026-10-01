@@ -334,6 +334,19 @@ export class TmdbService {
     if (!trimmed) {
       return of(false);
     }
+    if (trimmed.startsWith('eyJ')) {
+      return this.http
+        .get(`${this.baseUrl}/configuration`, {
+          headers: {
+            Authorization: `Bearer ${trimmed}`,
+            Accept: 'application/json',
+          },
+        })
+        .pipe(
+          map(() => true),
+          catchError(() => of(false))
+        );
+    }
     const params = new HttpParams().set('api_key', trimmed);
     return this.http.get(`${this.baseUrl}/configuration`, { params }).pipe(
       map(() => true),
