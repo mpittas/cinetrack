@@ -1,75 +1,188 @@
 <div class="discover-container">
-  <!-- Featured hero (only when not actively searching) -->
+  <!-- Value Proposition & Product Purpose Header (Shown when not actively searching) -->
   @if (!currentQuery()) {
-    @if (searchService.heroMovie$ | async; as hero) {
-      <section class="hero-banner">
-        <div
-          class="hero-backdrop"
-          [style.background-image]="'url(' + tmdbService.getImageUrl(hero.backdrop_path, 'original') + ')'"
-        ></div>
-        <div class="hero-gradient-overlay"></div>
-
-        <div class="hero-content animate-fade-in">
-          <h1 class="hero-title">{{ hero.title }}</h1>
-
-          <div class="hero-meta-row">
-            <span class="badge-rating">
-              <svg viewBox="0 0 24 24" fill="currentColor" class="star-icon">
-                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-              </svg>
-              {{ hero.vote_average.toFixed(1) }}
-            </span>
-            <span>{{ hero.release_date.substring(0, 4) }}</span>
-            @if (hero.runtime) {
-              <span class="dot-sep"></span>
-              <span>{{ hero.runtime }} min</span>
-            }
+    <section class="cinetrack-intro-section animate-fade-in">
+      <div class="intro-shell">
+        <div class="intro-headline-block">
+          <div class="intro-pill-badge">
+            <span class="live-dot"></span>
+            <span>Personal Cinema Journal & Tracker</span>
           </div>
 
-          @if (hero.tagline) {
-            <p class="hero-tagline">{{ hero.tagline }}</p>
-          }
-          <p class="hero-overview">{{ hero.overview }}</p>
+          <h1 class="intro-hero-heading">
+            Track every film.<br />
+            Curate your cinema diary.
+          </h1>
 
-          <div class="hero-actions">
-            <a [routerLink]="['/movie', hero.id]" class="btn-primary" id="btn-hero-details">
-              <span>View details</span>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <line x1="5" y1="12" x2="19" y2="12"></line>
-                <polyline points="12 5 19 12 12 19"></polyline>
-              </svg>
-            </a>
+          <p class="intro-hero-desc">
+            CineTrack is your private cinema companion. Discover new films, build your personal watchlist,
+            record ratings & reviews, and track your viewing habits — backed by live TMDB and secured in your cloud profile.
+          </p>
 
-            <button
-              type="button"
-              class="btn-secondary"
-              [class.is-active]="watchlistService.isInWatchlist(hero.id)"
-              (click)="toggleHeroWatchlist(hero)"
-              id="btn-hero-watchlist"
-            >
-              <svg
-                viewBox="0 0 24 24"
-                [attr.fill]="watchlistService.isInWatchlist(hero.id) ? 'currentColor' : 'none'"
-                stroke="currentColor"
-                stroke-width="2"
-              >
-                <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+          <div class="intro-cta-row">
+            <button type="button" class="btn-primary intro-search-btn" (click)="focusGlobalSearch()" id="btn-hero-search">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-inline">
+                <circle cx="11" cy="11" r="7"></circle>
+                <line x1="20" y1="20" x2="16.5" y2="16.5"></line>
               </svg>
-              <span>{{ watchlistService.isInWatchlist(hero.id) ? 'On watchlist' : 'Watchlist' }}</span>
+              <span>Search 800,000+ films</span>
+              <kbd class="kbd-hint">{{ isMac ? '⌘K' : 'Ctrl+K' }}</kbd>
             </button>
 
-            <button
-              type="button"
-              class="btn-icon"
-              (click)="openReview(hero)"
-              title="Write a review"
-              aria-label="Write a review"
-            >
+            <a routerLink="/watchlist" class="btn-secondary" id="btn-hero-library">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-inline">
+                <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+              </svg>
+              <span>Your Library ({{ watchlistService.stats().totalMovies }})</span>
+            </a>
+
+            @if (!authService.isAuthenticated()) {
+              <button type="button" class="btn-ghost intro-signin-btn" (click)="openAuthModal()" id="btn-hero-auth">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-inline">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+                <span>Sign in for Cloud Sync</span>
+              </button>
+            }
+          </div>
+        </div>
+
+        <!-- 4 Pillars: What CineTrack Offers -->
+        <div class="pillars-grid">
+          <div class="pillar-card">
+            <div class="pillar-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="9"></circle>
+                <polygon points="15.5 8.5 13.5 13.5 8.5 15.5 10.5 10.5 15.5 8.5" fill="currentColor"></polygon>
+              </svg>
+            </div>
+            <div class="pillar-content">
+              <h3>Live Cinema Discovery</h3>
+              <p>Explore millions of movies, theatrical releases, trending titles, cast members, and official trailers via TMDB.</p>
+            </div>
+          </div>
+
+          <div class="pillar-card">
+            <div class="pillar-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+              </svg>
+            </div>
+            <div class="pillar-content">
+              <h3>Curated Watchlist</h3>
+              <p>Queue films you want to see, mark movies as watched, and preserve your all-time favorites in one library.</p>
+            </div>
+          </div>
+
+          <div class="pillar-card">
+            <div class="pillar-icon">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M12 20h9"></path>
                 <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"></path>
               </svg>
-            </button>
+            </div>
+            <div class="pillar-content">
+              <h3>Personal Film Diary</h3>
+              <p>Write detailed reviews, give 5-star ratings, track rewatches, and organize entries with custom tags.</p>
+            </div>
+          </div>
+
+          <div class="pillar-card">
+            <div class="pillar-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="6" y1="20" x2="6" y2="13"></line>
+                <line x1="12" y1="20" x2="12" y2="5"></line>
+                <line x1="18" y1="20" x2="18" y2="10"></line>
+              </svg>
+            </div>
+            <div class="pillar-content">
+              <h3>Stats & Cloud Backup</h3>
+              <p>Measure hours spent watching, track rating distributions, and sync seamlessly to Firebase Firestore.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Featured Spotlight Film (Top Trending) -->
+    @if (searchService.heroMovie$ | async; as hero) {
+      <section class="spotlight-section">
+        <div class="spotlight-header-label">
+          <span class="spotlight-label-pill">Spotlight Film</span>
+          <span class="spotlight-label-sub">Trending #1 this week</span>
+        </div>
+
+        <div class="spotlight-card">
+          <div
+            class="spotlight-backdrop"
+            [style.background-image]="'url(' + tmdbService.getImageUrl(hero.backdrop_path, 'original') + ')'"
+          ></div>
+          <div class="spotlight-gradient-overlay"></div>
+
+          <div class="spotlight-content">
+            <div class="spotlight-meta-line">
+              <span class="badge-rating">
+                <svg viewBox="0 0 24 24" fill="currentColor" class="star-icon">
+                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                </svg>
+                {{ hero.vote_average.toFixed(1) }}
+              </span>
+              <span>{{ hero.release_date.substring(0, 4) }}</span>
+              @if (hero.runtime) {
+                <span class="dot-sep"></span>
+                <span>{{ hero.runtime }} min</span>
+              }
+            </div>
+
+            <h2 class="spotlight-title">{{ hero.title }}</h2>
+
+            @if (hero.tagline) {
+              <p class="spotlight-tagline">“{{ hero.tagline }}”</p>
+            }
+            <p class="spotlight-overview">{{ hero.overview }}</p>
+
+            <div class="spotlight-actions">
+              <a [routerLink]="['/movie', hero.id]" class="btn-primary" id="btn-spotlight-details">
+                <span>View details</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-inline">
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                  <polyline points="12 5 19 12 12 19"></polyline>
+                </svg>
+              </a>
+
+              <button
+                type="button"
+                class="btn-secondary"
+                [class.is-active]="watchlistService.isInWatchlist(hero.id)"
+                (click)="toggleHeroWatchlist(hero)"
+                id="btn-spotlight-watchlist"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  [attr.fill]="watchlistService.isInWatchlist(hero.id) ? 'currentColor' : 'none'"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  class="icon-inline"
+                >
+                  <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+                </svg>
+                <span>{{ watchlistService.isInWatchlist(hero.id) ? 'On watchlist' : 'Watchlist' }}</span>
+              </button>
+
+              <button
+                type="button"
+                class="btn-icon"
+                (click)="openReview(hero)"
+                title="Write a review"
+                aria-label="Write a review"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 20h9"></path>
+                  <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"></path>
+                </svg>
+              </button>
+            </div>
           </div>
         </div>
       </section>
@@ -78,7 +191,7 @@
 
   <!-- Catalog Section -->
   <div class="content-wrapper" [class.no-hero]="!!currentQuery()">
-    <!-- If searching: prominent search header -->
+    <!-- If searching: prominent search results banner -->
     @if (currentQuery()) {
       <div class="search-active-banner animate-fade-in">
         <div class="search-banner-text">
@@ -118,7 +231,7 @@
               (click)="setTab('topRated')"
               id="tab-toprated"
             >
-              Top rated
+              Top rated films
             </button>
             <button
               type="button"
@@ -171,7 +284,7 @@
     @if (searchService.movies$ | async; as movies) {
       @if (!currentQuery()) {
         <div class="section-heading">
-          <h2>Now showing</h2>
+          <h2>Browse catalog</h2>
           <span class="count">{{ movies.length }} titles</span>
         </div>
       }
@@ -193,6 +306,12 @@
   </div>
 </div>
 
+<!-- Review Modal -->
 @if (activeReviewMovie()) {
   <app-review-modal [movie]="activeReviewMovie()!" (close)="closeReview()"></app-review-modal>
+}
+
+<!-- Auth Modal -->
+@if (showAuthModal()) {
+  <app-auth-modal (closeModal)="closeAuthModal()"></app-auth-modal>
 }
